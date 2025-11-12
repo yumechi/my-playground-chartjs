@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chart.js サンプル</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .chart-container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        canvas {
+            max-width: 100%;
+        }
+        #barChart, #barChart2 {
+            height: 500px !important;
+        }
+        #barChart3, #barChart4 {
+            height: 250px !important;
+        }
+        #barChart4 {
+            width: 80% !important;
+        }
+        .canvas-wrapper {
+            width: 80%;
+            margin: 0 auto;
+        }
+        #barChart5 {
+            height: 250px !important;
+        }
+    </style>
+</head>
+<body>
+    <h1>Chart.js プレイグラウンド</h1>
+
+    <div class="chart-container">
+        <h2>1. デフォルト表示（非常に長い商品名）</h2>
+        <p>最初50文字が類似している商品名をそのまま表示</p>
+        <canvas id="barChart"></canvas>
+    </div>
+
+    <div class="chart-container">
+        <h2>2. 改善版：左揃え + 30文字制限</h2>
+        <p>ラベルを左揃えにし、最大30文字で切り捨て（ツールチップで全文表示）</p>
+        <canvas id="barChart2"></canvas>
+    </div>
+
+    <div class="chart-container">
+        <h2>3. 改善版：左揃え + 30文字制限 + コンパクト表示</h2>
+        <p>バーの高さと全体サイズを最適化（全体250px、barPercentage: 0.6）</p>
+        <canvas id="barChart3"></canvas>
+    </div>
+
+    <div class="chart-container">
+        <h2>4. 改善版：フォントサイズ固定 + 横伸び防止</h2>
+        <p>フォントサイズを10pxに固定し、横伸びを防止（width: 80%）</p>
+        <canvas id="barChart4"></canvas>
+    </div>
+
+    <div class="chart-container">
+        <h2>5. 改善版：中央寄せ + ツールチップ折り返し</h2>
+        <p>キャンバスを中央寄せし、ツールチップを50文字で折り返し表示</p>
+        <div class="canvas-wrapper">
+            <canvas id="barChart5"></canvas>
+        </div>
+    </div>
+
+    <script type="module" src="/main.js"></script>
+</body>
+</html>
