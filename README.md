@@ -69,6 +69,7 @@ mainブランチにプッシュすると、自動的にGitHub Pagesにデプロ�
 .
 ├── index.html              # エントリーポイントHTML
 ├── main.js                 # メインJavaScriptファイル
+├── vite.config.js          # Vite設定（base pathなど）
 ├── package.json            # npm設定
 ├── .github/
 │   └── workflows/
