@@ -21,8 +21,28 @@ Chart.jsは、HTML5 Canvasを使用したシンプルかつ柔軟なJavaScript�
 - 商品名が非常に長い（100文字以上）
 - 最初の50文字が類似しており、区別がつきにくい
 - Y軸ラベルが読みにくい、または横に伸びすぎる
+- 項目数に応じて適切な高さでグラフを表示したい
 
-## グラフ改善の5つのアプローチ
+## プロジェクト構成（TypeScript化）
+
+本プロジェクトは、保守性と型安全性を高めるためにTypeScriptで実装されています。
+
+```
+src/
+├── main.ts                        # エントリーポイント
+├── data.ts                        # 共通データ定義
+└── charts/
+    ├── chart1-default.ts          # デフォルト表示
+    ├── chart2-left-aligned.ts     # 左揃え + 30文字制限
+    ├── chart3-compact.ts          # コンパクト表示
+    ├── chart4-fixed-font.ts       # フォントサイズ固定
+    ├── chart5-wrapped-tooltip.ts  # ツールチップ折り返し
+    └── chart6-auto-height.ts      # 自動高さ調整
+```
+
+各チャートは独立したモジュールとして実装され、main.tsで一括初期化されます。
+
+## グラフ改善の6つのアプローチ
 
 ### 1. デフォルト表示（非常に長い商品名）
 
@@ -31,7 +51,8 @@ Chart.jsは、HTML5 Canvasを使用したシンプルかつ柔軟なJavaScript�
 - 長い商品名を全文表示しようとする
 
 **問題点:**
-```javascript
+```typescript
+// src/charts/chart1-default.ts
 labels: fullLabels,  // 100文字以上の商品名をそのまま使用
 ```
 - Y軸ラベルが途中で切れる
@@ -48,12 +69,13 @@ labels: fullLabels,  // 100文字以上の商品名をそのまま使用
 - ツールチップで全文を表示
 
 **実装例:**
-```javascript
-// ラベルを30文字に制限
-const truncatedLabels = fullLabels.map(label => {
+```typescript
+// src/data.ts - 共通データとして定義
+export const truncatedLabels = fullLabels.map(label => {
     return label.length > 30 ? label.substring(0, 30) + '...' : label;
 });
 
+// src/charts/chart2-left-aligned.ts
 // Y軸設定
 y: {
     ticks: {
@@ -87,7 +109,8 @@ tooltip: {
 - 全体の高さを250pxに制限
 
 **実装例:**
-```javascript
+```typescript
+// src/charts/chart3-compact.ts
 datasets: [{
     barPercentage: 0.6,      // カテゴリ幅に対するバーの割合を60%に
     categoryPercentage: 0.9   // 全体に対するカテゴリの割合を90%に
@@ -119,12 +142,14 @@ y: {
 
 **実装例:**
 ```css
+/* index.html */
 #barChart4 {
     width: 80% !important;
 }
 ```
 
-```javascript
+```typescript
+// src/charts/chart4-fixed-font.ts
 y: {
     ticks: {
         font: {
@@ -153,22 +178,25 @@ y: {
 
 **実装例:**
 ```html
+<!-- index.html -->
 <div class="canvas-wrapper">
     <canvas id="barChart5"></canvas>
 </div>
 ```
 
 ```css
+/* index.html */
 .canvas-wrapper {
     width: 80%;
     margin: 0 auto;  /* 中央寄せ */
 }
 ```
 
-```javascript
+```typescript
+// src/charts/chart5-wrapped-tooltip.ts
 // ツールチップのタイトルを50文字ごとに折り返す関数
-function wrapText(text, maxLength) {
-    const lines = [];
+function wrapText(text: string, maxLength: number): string[] {
+    const lines: string[] = [];
     for (let i = 0; i < text.length; i += maxLength) {
         lines.push(text.substring(i, i + maxLength));
     }
@@ -192,6 +220,52 @@ tooltip: {
 
 ---
 
+### 6. 改善版：項目数に応じた自動高さ調整
+
+**改善ポイント:**
+- 項目数に応じて動的にチャートの高さを計算
+- 1項目あたり50pxで計算し、最小200px〜最大1000pxに制限
+- データ量が変わっても適切な高さで表示
+
+**実装例:**
+```typescript
+// src/charts/chart6-auto-height.ts
+export function createAutoHeightChart() {
+    const container = document.getElementById('barChart6Container');
+    const barCtx6 = document.getElementById('barChart6') as HTMLCanvasElement | null;
+    if (!barCtx6 || !container) return;
+
+    // 項目数に応じて高さを計算
+    const itemHeight = 50; // 1項目あたりのピクセル数
+    const minHeight = 200;
+    const maxHeight = 1000;
+    const calculatedHeight = Math.min(
+        Math.max(salesData.length * itemHeight, minHeight),
+        maxHeight
+    );
+
+    // コンテナの高さを設定
+    container.style.height = `${calculatedHeight}px`;
+
+    new Chart(barCtx6, {
+        // ... チャート設定
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,  // 重要: アスペクト比を固定しない
+            // ...
+        }
+    });
+}
+```
+
+**効果:**
+- 項目が少ない場合も多い場合も適切な高さで表示
+- スクロールの必要性を減らせる
+- データ量の変更に柔軟に対応
+- 現在のデータ(5項目)では250pxの高さになる
+
+---
+
 ## まとめ
 
 ### 各アプローチの使い分け
@@ -203,11 +277,12 @@ tooltip: {
 | 3. コンパクト表示 | データ数が多く一覧性が重要な場合 |
 | 4. 横伸び防止 | 画面幅が限られている場合 |
 | 5. 中央寄せ+折り返し | プレゼン資料など、視覚的な整合性が重要な場合 |
+| 6. 自動高さ調整 | データ量が可変で、常に適切な高さで表示したい場合 |
 
 ### 重要な設定項目
 
 **Y軸のカスタマイズ:**
-```javascript
+```typescript
 y: {
     ticks: {
         align: 'start',      // 左揃え（start）/ 中央揃え（center）
@@ -219,7 +294,7 @@ y: {
 ```
 
 **バーの太さ調整:**
-```javascript
+```typescript
 datasets: [{
     barPercentage: 0.6,       // バーの太さ（0.0 - 1.0）
     categoryPercentage: 0.9   // カテゴリ間のスペース
@@ -227,7 +302,7 @@ datasets: [{
 ```
 
 **ツールチップのカスタマイズ:**
-```javascript
+```typescript
 tooltip: {
     callbacks: {
         title: function(context) {
@@ -236,6 +311,41 @@ tooltip: {
         }
     }
 }
+```
+
+**動的な高さ調整:**
+```typescript
+// コンテナの高さを動的に設定
+const calculatedHeight = Math.min(
+    Math.max(items.length * itemHeight, minHeight),
+    maxHeight
+);
+container.style.height = `${calculatedHeight}px`;
+
+// maintainAspectRatioをfalseに設定
+options: {
+    maintainAspectRatio: false
+}
+```
+
+## 技術スタック
+
+- **Chart.js**: ^4.5.1
+- **TypeScript**: ^5.9.3
+- **Vite**: ^7.2.2
+- **Node.js**: v24 (mise経由)
+
+### ビルドとデプロイ
+
+```bash
+# 開発サーバー起動
+npm run dev
+
+# TypeScriptコンパイル + Viteビルド
+npm run build
+
+# GitHub Pagesへ自動デプロイ
+git push origin main
 ```
 
 ## 参考リンク
