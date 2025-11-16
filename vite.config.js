@@ -9,5 +9,9 @@ export default defineConfig(({ command, mode }) => {
 
   return {
     base,
+    root: '.',
+    build: {
+      outDir: 'dist',
+    }
   }
 })
