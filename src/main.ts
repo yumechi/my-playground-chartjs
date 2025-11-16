@@ -3,6 +3,7 @@ import { createLeftAlignedChart } from './charts/chart2-left-aligned';
 import { createCompactChart } from './charts/chart3-compact';
 import { createFixedFontChart } from './charts/chart4-fixed-font';
 import { createWrappedTooltipChart } from './charts/chart5-wrapped-tooltip';
+import { createAutoHeightChart } from './charts/chart6-auto-height';
 
 // すべてのチャートを初期化
 createDefaultChart();
@@ -10,3 +11,4 @@ createLeftAlignedChart();
 createCompactChart();
 createFixedFontChart();
 createWrappedTooltipChart();
+createAutoHeightChart();
